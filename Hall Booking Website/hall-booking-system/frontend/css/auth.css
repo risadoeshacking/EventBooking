@@ -55,7 +55,7 @@
 }
 
 .auth-sidebar li::before {
-  content: "✦";
+  content: "\2726";
   color: #f5c542;
   font-size: 12px;
 }

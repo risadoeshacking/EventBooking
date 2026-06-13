@@ -394,7 +394,7 @@
           '<div style="font-size:12px;color:var(--cal-muted);font-weight:600;margin-top:2px;">Please select another date.</div>' +
           "</div>" +
           "</div>" +
-          '<span class="availability-state-badge">🔒 Locked</span>';
+          '<span class="availability-state-badge">Locked</span>';
       }
       hideEl(bookingCardWrap);
       return;
@@ -416,7 +416,7 @@
         '<div style="font-size:12px;color:var(--cal-muted);font-weight:600;margin-top:2px;">Enter event details below.</div>' +
         "</div>" +
         "</div>" +
-        '<span class="availability-state-badge">✨ Gold Window</span>';
+        '<span class="availability-state-badge">Gold Window</span>';
     }
 
     // 7. Show booking card
@@ -563,7 +563,7 @@
             '<div style="font-size:12px;color:var(--cal-muted);font-weight:600;margin-top:2px;">Admin will review within 24 hours.</div>' +
             "</div>" +
             "</div>" +
-            '<span class="availability-state-badge">✓ Confirmed</span>';
+            '<span class="availability-state-badge">Confirmed</span>';
         }
       } catch (err) {
         setHint("Booking failed. Please try again.");
@@ -578,7 +578,7 @@
             "</div>" +
             "</div>" +
             "</div>" +
-            '<span class="availability-state-badge">✕ Error</span>';
+            '<span class="availability-state-badge">Error</span>';
         }
       } finally {
         setLoading(false);
@@ -791,7 +791,7 @@
             cell.innerHTML =
               '<div style="font-weight:700;font-size:14px;padding:4px;">' +
               date +
-              '</div><div style="font-size:8px;font-weight:800;color:#f5c542;text-align:center;">🔒 Booked</div>';
+              '</div><div style="font-size:8px;font-weight:800;color:#f5c542;text-align:center;">Booked</div>';
           } else {
             if (isToday) {
               cell.style.border = "2px solid #f5c542";

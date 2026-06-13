@@ -370,11 +370,11 @@ app.use(function (req, res) {
 var PORT = process.env.PORT || 3000;
 app.listen(PORT, "0.0.0.0", function () {
   console.log("");
-  console.log("  ✦ EventSpace — Premium Hall Booking System");
+  console.log("  EventSpace - Premium Hall Booking System");
   console.log("  ──────────────────────────────────────────────");
   console.log("  Mode:    Standalone (no database required)");
   console.log("  URL:     http://localhost:" + PORT);
-  console.log("  Status:  ✓ Running");
+  console.log("  Status:  Running");
   console.log("");
   console.log("  Home         → http://localhost:" + PORT + "/");
   console.log(

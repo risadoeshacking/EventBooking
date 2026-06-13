@@ -401,7 +401,7 @@
 
       var lockSpan = document.createElement("span");
       lockSpan.className = "es-slot-lock";
-      lockSpan.textContent = "🔒";
+      lockSpan.textContent = "Locked";
       slot.appendChild(lockSpan);
 
       var timeSpan = document.createElement("span");

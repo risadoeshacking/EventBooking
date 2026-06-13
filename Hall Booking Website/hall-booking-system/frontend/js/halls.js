@@ -75,7 +75,7 @@
     if (!list || !list.length) {
       grid.innerHTML = `
         <div class="col-span-full text-center py-20">
-          <div class="text-4xl mb-4">🏛️</div>
+          <div class="text-4xl mb-4" style="font-size:2rem;color:var(--es-maroon);">&#9670;</div>
           <div class="text-lg font-semibold text-gray-900">No halls found</div>
           <div class="text-sm text-[var(--muted)] mt-1">Try adjusting your search.</div>
         </div>
@@ -116,7 +116,7 @@
       if (grid) {
         grid.innerHTML = `
           <div class="col-span-full text-center py-20">
-            <div class="text-4xl mb-4">⚠️</div>
+            <div class="text-4xl mb-4" style="font-size:2rem;color:var(--es-maroon);">&#9888;</div>
             <div class="text-lg font-semibold text-gray-900">Failed to load halls</div>
             <div class="text-sm text-[var(--muted)] mt-1">Please refresh the page to try again.</div>
           </div>
