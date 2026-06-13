@@ -1,5 +1,8 @@
 Flask
 gunicorn
 flask-cors
+PyJWT
+bcrypt
 psycopg2-binary
+Werkzeug
 python-dotenv
