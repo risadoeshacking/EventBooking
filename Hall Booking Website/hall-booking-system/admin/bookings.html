@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EventSpace — Manage Bookings</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/styles.css" />
+    <link rel="stylesheet" href="css/admin.css" />
+  </head>
+  <body>
+    <div class="admin-layout">
+      <aside class="admin-sidebar">
+        <a href="/admin/dashboard.html" class="admin-sidebar-logo">
+          <span class="logo-icon">E</span>
+          <span class="logo-text">EventSpace Admin</span>
+        </a>
+        <a href="dashboard.html" class="admin-nav-item">
+          <span class="nav-icon">📊</span> Dashboard
+        </a>
+        <a href="bookings.html" class="admin-nav-item active">
+          <span class="nav-icon">📅</span> Bookings
+        </a>
+        <a href="halls.html" class="admin-nav-item">
+          <span class="nav-icon">🏛️</span> Halls
+        </a>
+        <a href="user.html" class="admin-nav-item">
+          <span class="nav-icon">👥</span> Users
+        </a>
+        <a href="reports.html" class="admin-nav-item">
+          <span class="nav-icon">📈</span> Reports
+        </a>
+        <div
+          style="
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid var(--admin-border);
+          "
+        >
+          <a href="/" class="admin-nav-item">
+            <span class="nav-icon">←</span> Back to Site
+          </a>
+        </div>
+      </aside>
+
+      <main class="admin-main">
+        <div class="admin-header">
+          <h1>Bookings</h1>
+          <div class="admin-search">
+            <input
+              type="text"
+              id="searchInput"
+              class="admin-input"
+              placeholder="Search by event or guest..."
+            />
+            <select id="statusFilter" class="admin-select">
+              <option value="">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <h2>All Bookings</h2>
+            <span class="card-badge" id="bookingCount">—</span>
+          </div>
+          <div style="overflow-x: auto">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Event</th>
+                  <th>Hall</th>
+                  <th>Date</th>
+                  <th>Guest</th>
+                  <th>Email</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="bookingsTable">
+                <tr>
+                  <td
+                    colspan="7"
+                    style="
+                      text-align: center;
+                      color: var(--admin-muted);
+                      padding: 24px;
+                    "
+                  >
+                    Loading...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      let searchTimeout = null;
+      const token = localStorage.getItem("eventspace_token");
+
+      async function loadBookings() {
+        const q = document.getElementById("searchInput").value.trim();
+        const status = document.getElementById("statusFilter").value;
+        const params = new URLSearchParams();
+        if (q) params.set("q", q);
+        if (status) params.set("status", status);
+        params.set("limit", "100");
+
+        try {
+          const r = await fetch("/api/bookings/admin?" + params.toString(), {
+            headers: { Authorization: "Bearer " + token },
+          });
+          if (!r.ok) throw new Error("Unauthorized");
+          const d = await r.json();
+          const bookings = d.bookings || [];
+          document.getElementById("bookingCount").textContent =
+            bookings.length + " total";
+
+          const tbody = document.getElementById("bookingsTable");
+          if (!bookings.length) {
+            tbody.innerHTML =
+              '<tr><td colspan="7" style="text-align:center;color:var(--admin-muted);padding:24px;">No bookings found.</td></tr>';
+            return;
+          }
+
+          tbody.innerHTML = bookings
+            .map((b) => {
+              const date = new Date(b.start_datetime).toLocaleDateString();
+              const statusClass = b.status;
+              const canApprove = b.status === "pending";
+              const canReject = b.status === "pending";
+              return `<tr>
+            <td><strong>${b.event_name}</strong></td>
+            <td>${b.hall_name || "—"}</td>
+            <td>${date}</td>
+            <td>${b.guest_name || "—"}</td>
+            <td>${b.guest_email || "—"}</td>
+            <td><span class="status-badge ${statusClass}">${
+                statusClass.charAt(0).toUpperCase() + statusClass.slice(1)
+              }</span></td>
+            <td>
+              <div style="display:flex;gap:6px;">
+                ${
+                  canApprove
+                    ? `<button class="admin-btn admin-btn-success admin-btn-sm" onclick="approveBooking('${b.id}')">Approve</button>`
+                    : ""
+                }
+                ${
+                  canReject
+                    ? `<button class="admin-btn admin-btn-danger admin-btn-sm" onclick="rejectBooking('${b.id}')">Reject</button>`
+                    : ""
+                }
+              </div>
+            </td>
+          </tr>`;
+            })
+            .join("");
+        } catch {
+          document.getElementById("bookingsTable").innerHTML =
+            '<tr><td colspan="7" style="text-align:center;color:var(--admin-muted);padding:24px;">Please login as admin.</td></tr>';
+        }
+      }
+
+      async function approveBooking(id) {
+        try {
+          await fetch("/api/bookings/admin/approve/" + id, {
+            method: "POST",
+            headers: { Authorization: "Bearer " + token },
+          });
+          loadBookings();
+        } catch {}
+      }
+
+      async function rejectBooking(id) {
+        try {
+          await fetch("/api/bookings/admin/reject/" + id, {
+            method: "POST",
+            headers: { Authorization: "Bearer " + token },
+          });
+          loadBookings();
+        } catch {}
+      }
+
+      document.getElementById("searchInput").addEventListener("input", () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(loadBookings, 300);
+      });
+      document
+        .getElementById("statusFilter")
+        .addEventListener("change", loadBookings);
+
+      loadBookings();
+    </script>
+  </body>
+</html>

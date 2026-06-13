@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EventSpace — Manage Halls</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/styles.css" />
+    <link rel="stylesheet" href="css/admin.css" />
+  </head>
+  <body>
+    <div class="admin-layout">
+      <aside class="admin-sidebar">
+        <a href="/admin/dashboard.html" class="admin-sidebar-logo">
+          <span class="logo-icon">E</span>
+          <span class="logo-text">EventSpace Admin</span>
+        </a>
+        <a href="dashboard.html" class="admin-nav-item">
+          <span class="nav-icon">📊</span> Dashboard
+        </a>
+        <a href="bookings.html" class="admin-nav-item">
+          <span class="nav-icon">📅</span> Bookings
+        </a>
+        <a href="halls.html" class="admin-nav-item active">
+          <span class="nav-icon">🏛️</span> Halls
+        </a>
+        <a href="user.html" class="admin-nav-item">
+          <span class="nav-icon">👥</span> Users
+        </a>
+        <a href="reports.html" class="admin-nav-item">
+          <span class="nav-icon">📈</span> Reports
+        </a>
+        <div
+          style="
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid var(--admin-border);
+          "
+        >
+          <a href="/" class="admin-nav-item">
+            <span class="nav-icon">←</span> Back to Site
+          </a>
+        </div>
+      </aside>
+
+      <main class="admin-main">
+        <div class="admin-header">
+          <h1>Halls</h1>
+          <button class="admin-btn admin-btn-gold" id="refreshBtn">
+            🔄 Refresh
+          </button>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <h2>All Halls</h2>
+            <span class="card-badge" id="hallCount">—</span>
+          </div>
+          <div style="overflow-x: auto">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Slug</th>
+                  <th>Capacity</th>
+                  <th>Price/hr</th>
+                  <th>Features</th>
+                </tr>
+              </thead>
+              <tbody id="hallsTbody">
+                <tr>
+                  <td
+                    colspan="5"
+                    style="
+                      text-align: center;
+                      color: var(--admin-muted);
+                      padding: 24px;
+                    "
+                  >
+                    Loading...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      const token = localStorage.getItem("eventspace_token");
+
+      async function loadHalls() {
+        try {
+          const r = await fetch("/api/halls/admin", {
+            headers: { Authorization: "Bearer " + token },
+          });
+          if (r.status === 401) {
+            localStorage.removeItem("eventspace_token");
+            window.location.href = "/login.html";
+            return;
+          }
+          const data = await r.json();
+          const halls = data.halls || [];
+          document.getElementById("hallCount").textContent =
+            halls.length + " hall(s)";
+
+          const tbody = document.getElementById("hallsTbody");
+          if (!halls.length) {
+            tbody.innerHTML =
+              '<tr><td colspan="5" style="text-align:center;color:var(--admin-muted);padding:24px;">No halls found.</td></tr>';
+            return;
+          }
+          tbody.innerHTML = halls
+            .map(function (h) {
+              var feats = (h.features || []).join(", ") || "—";
+              return (
+                "<tr><td><strong>" +
+                h.name +
+                "</strong></td><td>" +
+                h.slug +
+                "</td><td>" +
+                h.capacity +
+                "</td><td>$" +
+                Number(h.price_per_hour).toLocaleString() +
+                "</td><td>" +
+                feats +
+                "</td></tr>"
+              );
+            })
+            .join("");
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      document
+        .getElementById("refreshBtn")
+        ?.addEventListener("click", loadHalls);
+      loadHalls();
+    </script>
+  </body>
+</html>

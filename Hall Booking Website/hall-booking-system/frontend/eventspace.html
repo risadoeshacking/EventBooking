@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EventSpace — Interactive Hall Calendar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/eventspace.css" />
+  </head>
+  <body>
+    <!-- ─── TOP NAV BAR ─── -->
+    <header class="es-topbar">
+      <div class="es-topbar-inner">
+        <a href="/" class="es-logo">
+          <span class="es-logo-icon">E</span>
+          <span class="es-logo-text">EventSpace</span>
+        </a>
+        <div class="es-topbar-right">
+          <span id="esHallBadge" class="es-hall-badge">Loading...</span>
+          <a href="/halls.html" class="es-back-btn">← Back to Halls</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- ─── MAIN LAYOUT ─── -->
+    <main class="es-main">
+      <!-- ====== CALENDAR VIEW (Month View) ====== -->
+      <section id="esCalendarView" class="es-calendar-view">
+        <!-- Calendar Header -->
+        <div class="es-cal-header">
+          <button
+            id="esPrevMonth"
+            class="es-nav-btn"
+            aria-label="Previous month"
+          >
+            ‹
+          </button>
+          <h2 id="esMonthTitle" class="es-month-title">July 2026</h2>
+          <button id="esNextMonth" class="es-nav-btn" aria-label="Next month">
+            ›
+          </button>
+        </div>
+
+        <!-- Day-of-week row -->
+        <div class="es-dow-row">
+          <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span
+          ><span>Thu</span><span>Fri</span><span>Sat</span>
+        </div>
+
+        <!-- Calendar grid -->
+        <div id="esCalendarGrid" class="es-cal-grid"></div>
+
+        <!-- Legend -->
+        <div class="es-legend">
+          <span class="es-legend-item"
+            ><span class="es-dot es-dot-avail"></span> Available</span
+          >
+          <span class="es-legend-item"
+            ><span class="es-dot es-dot-booked"></span> Some Slots Booked</span
+          >
+          <span class="es-legend-item"
+            ><span class="es-dot es-dot-today"></span> Today</span
+          >
+        </div>
+      </section>
+
+      <!-- ====== DAY VIEW (Zoomed-in day) ====== -->
+      <section id="esDayView" class="es-day-view" aria-hidden="true">
+        <!-- Backdrop overlay -->
+        <div id="esDayBackdrop" class="es-day-backdrop"></div>
+
+        <!-- Day view panel -->
+        <div id="esDayPanel" class="es-day-panel">
+          <!-- Day view header -->
+          <div class="es-day-header">
+            <button
+              id="esDayBackBtn"
+              class="es-day-back-btn"
+              aria-label="Back to calendar"
+            >
+              <span class="es-back-arrow">←</span>
+              <span class="es-back-text">Back</span>
+            </button>
+            <div class="es-day-header-info">
+              <span id="esDayHallName" class="es-day-hall"
+                >The Grand Ballroom</span
+              >
+              <h1 id="esDayDate" class="es-day-date">Saturday, July 4, 2026</h1>
+            </div>
+          </div>
+
+          <!-- Time slots grid -->
+          <div class="es-slots-container">
+            <div class="es-slots-header">
+              <span class="es-slots-title">Available Time Slots</span>
+              <span class="es-slots-range">8:00 AM — 8:00 PM</span>
+            </div>
+            <div id="esSlotsGrid" class="es-slots-grid">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== BOOKING MODAL ====== -->
+      <div
+        id="esBookingModal"
+        class="es-modal-overlay"
+        aria-hidden="true"
+        role="dialog"
+        aria-modal="true"
+      >
+        <div class="es-modal">
+          <button id="esModalClose" class="es-modal-close" aria-label="Close">
+            ✕
+          </button>
+          <div class="es-modal-header">
+            <div class="es-modal-icon">✦</div>
+            <h3 class="es-modal-title">Confirm Booking</h3>
+            <p class="es-modal-subtitle" id="esModalSubtitle">
+              Hall 1 • July 4, 2026 • 10:00 AM - 11:00 AM
+            </p>
+          </div>
+          <form id="esBookingForm" class="es-modal-form" novalidate>
+            <input type="hidden" id="esFormHallId" name="hallId" />
+            <input type="hidden" id="esFormDate" name="date" />
+            <input type="hidden" id="esFormHour" name="hour" />
+
+            <div class="es-field">
+              <label for="esFormName"
+                >Full Name <span class="es-req">*</span></label
+              >
+              <input
+                id="esFormName"
+                type="text"
+                placeholder="John Smith"
+                required
+              />
+            </div>
+
+            <div class="es-field">
+              <label for="esFormEmail"
+                >Email <span class="es-req">*</span></label
+              >
+              <input
+                id="esFormEmail"
+                type="email"
+                placeholder="john@company.com"
+                required
+              />
+            </div>
+
+            <div class="es-field">
+              <label for="esFormPhone"
+                >Phone Number <span class="es-req">*</span></label
+              >
+              <input
+                id="esFormPhone"
+                type="tel"
+                placeholder="+1 (555) 123-4567"
+                required
+              />
+            </div>
+
+            <div class="es-field">
+              <label for="esFormEvent"
+                >Event Name <span class="es-opt">(optional)</span></label
+              >
+              <input
+                id="esFormEvent"
+                type="text"
+                placeholder="e.g., Gala Night"
+              />
+            </div>
+
+            <button type="submit" id="esFormSubmit" class="es-submit-btn">
+              <span id="esSubmitText">Confirm Booking</span>
+              <span id="esSubmitSpinner" class="es-spinner hidden"></span>
+            </button>
+
+            <p class="es-form-foot">
+              Your booking will be instantly confirmed.
+            </p>
+          </form>
+        </div>
+      </div>
+
+      <!-- ====== SUCCESS TOAST ====== -->
+      <div id="esSuccessToast" class="es-toast hidden" role="alert">
+        <span class="es-toast-icon">✓</span>
+        <span id="esToastMsg">Booking confirmed!</span>
+      </div>
+    </main>
+
+    <script src="/js/eventspace.js"></script>
+  </body>
+</html>

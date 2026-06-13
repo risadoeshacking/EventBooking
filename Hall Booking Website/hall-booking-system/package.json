@@ -1,0 +1,18 @@
+{
+  "name": "eventspace",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "cd backend && npm install && npm run dev",
+    "start": "cd backend && npm run start"
+  },
+  "description": "A modern, responsive hall booking platform (frontend + backend) with:",
+  "main": "server-standalone.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.22.2",
+    "jsonwebtoken": "^9.0.3"
+  }
+}

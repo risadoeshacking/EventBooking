@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EventSpace — Hall 1</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body class="bg-[var(--bg)] text-[var(--text)] font-[Inter]">
+    <header
+      class="sticky top-0 z-50 border-b border-white/10 bg-[rgba(10,16,29,0.55)] backdrop-blur-xl"
+    >
+      <nav
+        class="mx-auto max-w-6xl px-4 sm:px-6 py-3 flex items-center justify-between"
+      >
+        <a href="/" class="flex items-center gap-2">
+          <span
+            class="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white text-black font-bold"
+            >E</span
+          >
+          <span class="text-lg font-semibold tracking-tight">EventSpace</span>
+        </a>
+
+        <a class="btn btn-secondary" href="/halls.html">Back</a>
+      </nav>
+    </header>
+
+    <main class="mx-auto max-w-6xl px-4 sm:px-6 py-10 sm:py-14">
+      <div class="glass rounded-3xl p-6 sm:p-8">
+        <div class="flex items-start gap-4">
+          <div class="text-3xl">🏢</div>
+          <div class="space-y-2">
+            <h1 class="text-2xl sm:text-3xl font-bold">Hall 1</h1>
+            <p class="text-[var(--muted)]">
+              Loading the full hall booking page...
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      // Hall 1 wrapper page.
+      // We fetch halls and select the one most likely to be "Hall 1".
+      // Then we redirect to the shared hall details page (fully connected UI).
+      (async function () {
+        try {
+          const res = await fetch("/api/halls");
+          const data = await res.json();
+          const halls = data.halls || [];
+
+          const normalize = (s) =>
+            String(s || "")
+              .trim()
+              .toLowerCase();
+
+          const byExactName = halls.find(
+            (h) =>
+              normalize(h.name) === "hall 1" || normalize(h.slug) === "hall-1"
+          );
+
+          const byFallback =
+            byExactName ||
+            halls.find((h) => normalize(h.name).includes("hall 1")) ||
+            halls.find((h) => normalize(h.slug).includes("1")) ||
+            halls[0];
+
+          if (!byFallback || !byFallback.slug) {
+            // last resort: just go to hall-details without slug
+            window.location.href = "/hall-details.html";
+            return;
+          }
+
+          window.location.href = "/hall1-calendar.html";
+        } catch (e) {
+          window.location.href = "/hall-details.html";
+        }
+      })();
+    </script>
+  </body>
+</html>

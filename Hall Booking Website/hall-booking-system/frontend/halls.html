@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EventSpace — Premium Venues</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              maroon: { DEFAULT: "#6b0f1a", light: "#8a1528" },
+              gold: { DEFAULT: "#f5c542", light: "#e2b63d" },
+            },
+            fontFamily: {
+              inter: ["Inter", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="stylesheet" href="/css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      .halls-page {
+        min-height: 100vh;
+        background: #ffffff;
+        animation: pageEnter 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+
+      @keyframes pageEnter {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .hall-card {
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        border: 1px solid rgba(107, 15, 26, 0.08);
+        background: #ffffff;
+        transition: transform 400ms cubic-bezier(0.22, 1, 0.36, 1),
+          box-shadow 400ms cubic-bezier(0.22, 1, 0.36, 1);
+        will-change: transform;
+      }
+
+      .hall-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 24px 60px rgba(107, 15, 26, 0.12);
+      }
+
+      .hall-card-image {
+        position: relative;
+        height: 240px;
+        overflow: hidden;
+      }
+
+      .hall-card-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .hall-card:hover .hall-card-image img {
+        transform: scale(1.06);
+      }
+
+      .hall-card-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          to top,
+          rgba(0, 0, 0, 0.6),
+          transparent 60%
+        );
+      }
+
+      .hall-card-body {
+        padding: 24px;
+      }
+
+      .hall-feature-tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        background: rgba(107, 15, 26, 0.06);
+        color: rgba(10, 10, 10, 0.7);
+        border: 1px solid rgba(107, 15, 26, 0.08);
+      }
+
+      .search-glass {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border: 1px solid rgba(107, 15, 26, 0.08);
+        border-radius: 16px;
+      }
+
+      @media (max-width: 640px) {
+        .hall-card-image {
+          height: 180px;
+        }
+        .hall-card-body {
+          padding: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body class="halls-page font-inter text-[var(--text)] bg-white">
+    <!-- Header -->
+    <header
+      class="sticky top-0 z-50 border-b border-[var(--border)] bg-white/80 backdrop-blur-xl"
+    >
+      <nav
+        class="mx-auto max-w-6xl px-4 sm:px-6 py-3 flex items-center justify-between"
+      >
+        <a
+          href="/"
+          class="flex items-center gap-2 group"
+          aria-label="EventSpace Home"
+        >
+          <span
+            class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-maroon text-white font-bold text-base"
+          >
+            E
+          </span>
+          <span class="text-base font-semibold tracking-tight text-gray-900"
+            >EventSpace</span
+          >
+        </a>
+        <div class="hidden sm:flex items-center gap-6 text-sm">
+          <a class="nav-link" href="/">Home</a>
+          <a class="nav-link" href="/about.html">About</a>
+          <a class="nav-link" href="/contact.html">Contact</a>
+          <a class="nav-link" href="/login.html">Login</a>
+          <a class="btn btn-primary text-sm" href="/register.html"
+            >Create Account</a
+          >
+        </div>
+      </nav>
+    </header>
+
+    <!-- Hero -->
+    <section class="border-b border-[var(--border)]">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6 py-12 sm:py-16">
+        <div class="max-w-2xl">
+          <div
+            class="inline-flex items-center rounded-2xl bg-[var(--accent-light)] px-4 py-2 text-sm text-[var(--accent)] font-semibold"
+          >
+            ✦ Our Venues
+          </div>
+          <h1
+            class="mt-4 text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-gray-900"
+          >
+            Choose Your <span class="text-[var(--accent)]">Premium Space</span>
+          </h1>
+          <p class="mt-3 text-[var(--muted)] max-w-xl text-sm sm:text-base">
+            Two beautifully appointed halls for your next event. Each venue
+            features premium amenities, elegant design, and full-service
+            support.
+          </p>
+        </div>
+
+        <!-- Search -->
+        <div
+          class="mt-8 search-glass p-4 flex flex-col sm:flex-row gap-3 max-w-xl"
+        >
+          <input
+            id="searchInput"
+            class="input flex-1"
+            type="text"
+            placeholder="Search halls by name or description..."
+            aria-label="Search halls"
+          />
+          <button id="searchBtn" class="btn btn-secondary">Search</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Halls Grid -->
+    <main class="mx-auto max-w-6xl px-4 sm:px-6 py-10">
+      <div
+        id="hallsGrid"
+        class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8"
+      ></div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-[var(--border)] bg-white">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6 py-10">
+        <div
+          class="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-[var(--muted)]"
+        >
+          <div>© <span id="year"></span> EventSpace. All rights reserved.</div>
+          <div class="flex gap-4">
+            <a class="footer-link" href="/about.html">About</a>
+            <a class="footer-link" href="/contact.html">Contact</a>
+            <a class="footer-link" href="/halls.html">Halls</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+    <script src="/js/halls.js"></script>
+  </body>
+</html>

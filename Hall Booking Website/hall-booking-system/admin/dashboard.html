@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EventSpace — Admin Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/styles.css" />
+    <link rel="stylesheet" href="css/admin.css" />
+  </head>
+  <body>
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="admin-sidebar">
+        <a href="/admin/dashboard.html" class="admin-sidebar-logo">
+          <span class="logo-icon">E</span>
+          <span class="logo-text">EventSpace Admin</span>
+        </a>
+        <a href="dashboard.html" class="admin-nav-item active">
+          <span class="nav-icon">📊</span> Dashboard
+        </a>
+        <a href="bookings.html" class="admin-nav-item">
+          <span class="nav-icon">📅</span> Bookings
+        </a>
+        <a href="halls.html" class="admin-nav-item">
+          <span class="nav-icon">🏛️</span> Halls
+        </a>
+        <a href="user.html" class="admin-nav-item">
+          <span class="nav-icon">👥</span> Users
+        </a>
+        <a href="reports.html" class="admin-nav-item">
+          <span class="nav-icon">📈</span> Reports
+        </a>
+        <div
+          style="
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid var(--admin-border);
+          "
+        >
+          <a href="/" class="admin-nav-item">
+            <span class="nav-icon">←</span> Back to Site
+          </a>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="admin-main">
+        <div class="admin-header">
+          <h1>Dashboard</h1>
+          <div style="display: flex; gap: 10px; align-items: center">
+            <span
+              id="dashboardTime"
+              style="
+                font-size: 13px;
+                color: var(--admin-muted);
+                font-weight: 600;
+              "
+            ></span>
+          </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid" id="statsGrid">
+          <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-value" id="statTotal">—</div>
+            <div class="stat-label">Total Bookings</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-value" id="statPending">—</div>
+            <div class="stat-label">Pending</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-value" id="statApproved">—</div>
+            <div class="stat-label">Approved</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">❌</div>
+            <div class="stat-value" id="statRejected">—</div>
+            <div class="stat-label">Rejected</div>
+          </div>
+        </div>
+
+        <!-- Recent Bookings -->
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <h2>Recent Bookings</h2>
+            <span class="card-badge">Live</span>
+          </div>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Event</th>
+                <th>Hall</th>
+                <th>Date</th>
+                <th>Guest</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="recentBookings">
+              <tr>
+                <td
+                  colspan="5"
+                  style="
+                    text-align: center;
+                    color: var(--admin-muted);
+                    padding: 24px;
+                  "
+                >
+                  Loading...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      // Auth check
+      const token = localStorage.getItem("eventspace_token");
+      if (!token) {
+        window.location.href = "login.html";
+      }
+
+      document.getElementById("dashboardTime").textContent =
+        new Date().toLocaleString();
+
+      async function loadStats() {
+        try {
+          const r = await fetch("/api/bookings/admin/counts", {
+            headers: {
+              Authorization:
+                "Bearer " + localStorage.getItem("eventspace_token"),
+            },
+          });
+          if (!r.ok) return;
+          const d = await r.json();
+          const c = d.counts || {};
+          document.getElementById("statTotal").textContent =
+            (c.pending || 0) +
+            (c.approved || 0) +
+            (c.rejected || 0) +
+            (c.cancelled || 0);
+          document.getElementById("statPending").textContent = c.pending || 0;
+          document.getElementById("statApproved").textContent = c.approved || 0;
+          document.getElementById("statRejected").textContent = c.rejected || 0;
+        } catch {}
+      }
+
+      async function loadRecent() {
+        try {
+          const r = await fetch("/api/bookings/admin?limit=5", {
+            headers: {
+              Authorization:
+                "Bearer " + localStorage.getItem("eventspace_token"),
+            },
+          });
+          if (!r.ok) return;
+          const d = await r.json();
+          const bookings = d.bookings || [];
+          const tbody = document.getElementById("recentBookings");
+          if (!bookings.length) {
+            tbody.innerHTML =
+              '<tr><td colspan="5" style="text-align:center;color:var(--admin-muted);padding:24px;">No bookings found.</td></tr>';
+            return;
+          }
+          tbody.innerHTML = bookings
+            .map((b) => {
+              const date = new Date(b.start_datetime).toLocaleDateString();
+              const statusClass = b.status;
+              return `<tr>
+            <td><strong>${b.event_name}</strong></td>
+            <td>${b.hall_name || "—"}</td>
+            <td>${date}</td>
+            <td>${b.guest_name || b.user_name || "—"}</td>
+            <td><span class="status-badge ${statusClass}">${
+                statusClass.charAt(0).toUpperCase() + statusClass.slice(1)
+              }</span></td>
+          </tr>`;
+            })
+            .join("");
+        } catch {}
+      }
+
+      loadStats();
+      loadRecent();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EventSpace — Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/styles.css" />
+    <link rel="stylesheet" href="/css/auth.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-[var(--bg)] text-[var(--text)] font-[Inter]">
+    <header
+      class="sticky top-0 z-50 border-b border-white/10 bg-[rgba(10,16,29,0.55)] backdrop-blur-xl"
+    >
+      <nav
+        class="mx-auto max-w-6xl px-4 sm:px-6 py-3 flex items-center justify-between"
+      >
+        <a href="/" class="flex items-center gap-2">
+          <span
+            class="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-fuchsia-500 to-cyan-400 text-black font-bold"
+            >E</span
+          >
+          <span class="text-lg font-semibold tracking-tight">EventSpace</span>
+        </a>
+        <a class="btn btn-secondary" href="/register.html">Create account</a>
+      </nav>
+    </header>
+
+    <main class="mx-auto max-w-6xl px-4 sm:px-6 py-10 sm:py-14">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <section class="lg:col-span-7">
+          <div class="glass rounded-3xl p-6 sm:p-8">
+            <h1 class="text-2xl sm:text-3xl font-bold">Welcome back</h1>
+            <p class="text-[var(--muted)] mt-2">
+              Login to manage bookings and receive updates.
+            </p>
+
+            <form id="loginForm" class="mt-6 space-y-4" novalidate>
+              <label class="field">
+                <span>Email</span>
+                <input
+                  id="email"
+                  class="input"
+                  type="email"
+                  autocomplete="email"
+                  required
+                />
+              </label>
+              <label class="field">
+                <span>Password</span>
+                <input
+                  id="password"
+                  class="input"
+                  type="password"
+                  autocomplete="current-password"
+                  required
+                />
+              </label>
+
+              <label class="flex items-center gap-3 text-sm">
+                <input id="rememberMe" type="checkbox" class="h-4 w-4" />
+                <span class="text-[var(--muted)]">Remember me</span>
+              </label>
+
+              <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                <button class="btn btn-primary w-full" type="submit">
+                  Login
+                </button>
+                <a class="btn btn-ghost w-full" href="/booking.html"
+                  >Continue as guest</a
+                >
+              </div>
+
+              <a
+                href="#"
+                class="block text-sm text-[var(--muted)] hover:text-[var(--text)]"
+                aria-label="Forgot password"
+                >Forgot password?</a
+              >
+
+              <p
+                id="loginMsg"
+                class="text-sm text-[var(--muted)]"
+                aria-live="polite"
+              ></p>
+            </form>
+          </div>
+        </section>
+
+        <aside class="lg:col-span-5">
+          <div class="glass rounded-3xl p-6 sm:p-8">
+            <h2 class="text-xl font-semibold">Why login?</h2>
+            <ul class="mt-4 space-y-3 text-[var(--muted)] text-sm">
+              <li>• Track booking approvals</li>
+              <li>• Manage upcoming events</li>
+              <li>• Cancel pending bookings</li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <script src="/js/main.js"></script>
+    <script src="/js/login.js"></script>
+  </body>
+</html>

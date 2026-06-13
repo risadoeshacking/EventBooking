@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EventSpace — Premium Hall Calendar</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              maroon: { DEFAULT: "#6b0f1a", light: "#8a1528" },
+              gold: { DEFAULT: "#f5c542", light: "#e2b63d" },
+            },
+            fontFamily: {
+              inter: ["Inter", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <link rel="stylesheet" href="/css/styles.css" />
+    <link rel="stylesheet" href="/css/calendar-premium.css" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* Full-screen calendar layout */
+      .calendar-page {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        background: #ffffff;
+        overflow: hidden;
+      }
+
+      .calendar-header {
+        flex-shrink: 0;
+        border-bottom: 1px solid rgba(107, 15, 26, 0.08);
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        z-index: 30;
+      }
+
+      .calendar-body {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+
+      .calendar-glass-card {
+        flex: 1;
+        margin: 16px;
+        border-radius: 20px;
+        border: 1px solid rgba(107, 15, 26, 0.08);
+        background: #ffffff;
+        box-shadow: 0 8px 40px rgba(107, 15, 26, 0.06);
+        overflow: hidden;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Entry animation */
+      .calendar-page {
+        animation: pageEnter 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+
+      @keyframes pageEnter {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Navigation dots for month */
+      .month-nav-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: rgba(107, 15, 26, 0.15);
+        transition: background 200ms ease, transform 200ms ease;
+      }
+
+      .month-nav-dot.active {
+        background: var(--cal-maroon);
+        transform: scale(1.3);
+      }
+
+      @media (max-width: 768px) {
+        .calendar-glass-card {
+          margin: 8px;
+          border-radius: 16px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .calendar-glass-card {
+          margin: 4px;
+          border-radius: 12px;
+        }
+      }
+    </style>
+  </head>
+
+  <body class="calendar-page font-inter">
+    <!-- ── Header ── -->
+    <header class="calendar-header">
+      <nav
+        class="mx-auto max-w-7xl px-4 sm:px-6 py-3 flex items-center justify-between"
+      >
+        <a
+          href="/"
+          class="flex items-center gap-2 group"
+          aria-label="EventSpace Home"
+        >
+          <span
+            class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-maroon text-white font-bold text-base tracking-tight"
+          >
+            E
+          </span>
+          <span class="text-base font-semibold tracking-tight text-gray-900"
+            >EventSpace</span
+          >
+        </a>
+
+        <div class="flex items-center gap-3">
+          <a href="/halls.html" class="btn btn-ghost text-xs sm:text-sm">
+            ← Back to Halls
+          </a>
+        </div>
+      </nav>
+
+      <!-- Hall info bar -->
+      <div
+        class="mx-auto max-w-7xl px-4 sm:px-6 pb-3 flex items-center justify-between gap-4"
+      >
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="calendar-header-card">
+            <div class="hall-label">Venue</div>
+            <div class="hall-name" id="hallPill">Loading...</div>
+          </div>
+        </div>
+
+        <div class="calendar-header-card hidden sm:block">
+          <div class="hall-label">Status</div>
+          <div class="text-sm font-semibold text-gray-800" id="calendarHint">
+            Loading availability...
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── Calendar Body (full screen) ── -->
+    <main class="calendar-body">
+      <div class="calendar-glass-card">
+        <!-- Calendar toolbar extras -->
+        <div
+          class="flex items-center justify-between px-4 sm:px-6 pt-4 pb-2 border-b border-[var(--cal-border)]"
+        >
+          <div class="text-xs text-[var(--cal-muted)] font-medium">
+            Full-screen month view • Click a date to book
+          </div>
+          <div class="flex items-center gap-2 text-xs text-[var(--cal-muted)]">
+            <span class="inline-flex items-center gap-1.5">
+              <span
+                class="w-2.5 h-2.5 rounded-full"
+                style="background: rgba(107, 15, 26, 0.92)"
+              ></span>
+              Booked
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <span
+                class="w-2.5 h-2.5 rounded-full"
+                style="background: var(--cal-gold)"
+              ></span>
+              Today
+            </span>
+          </div>
+        </div>
+
+        <!-- Calendar container -->
+        <div class="flex-1 min-h-0 relative">
+          <!-- Cinematic backdrop overlay -->
+          <div
+            id="calendarBackdrop"
+            class="calendar-backdrop"
+            aria-hidden="true"
+          ></div>
+
+          <!-- FullCalendar -->
+          <div id="calendar" class="calendar-premium h-full"></div>
+
+          <!-- ── Cinematic Availability Panel ── -->
+          <aside
+            id="availabilityPanel"
+            class="availability-panel hidden"
+            aria-live="polite"
+          >
+            <div class="availability-inner">
+              <!-- Status Header -->
+              <div class="availability-status-header">
+                <div class="availability-status-icon available" id="statusIcon">
+                  ✦
+                </div>
+                <div class="availability-status-content">
+                  <div class="availability-status-title" id="availabilityTitle">
+                    Availability
+                  </div>
+                  <div
+                    class="availability-status-subtitle"
+                    id="availabilitySubtitle"
+                  ></div>
+                </div>
+              </div>
+
+              <!-- Availability State -->
+              <div id="availabilityState" class="availability-state"></div>
+
+              <!-- ── Booking Card ── -->
+              <div id="bookingCardWrap" class="booking-card-wrap hidden">
+                <div class="booking-card">
+                  <div class="booking-card-head">
+                    <div class="booking-card-kicker">Event Details</div>
+                    <div class="booking-card-title" id="bookingCardTitle">
+                      Book this date
+                    </div>
+                  </div>
+
+                  <form id="bookingInlineForm" class="booking-inline-form">
+                    <input type="hidden" id="selectedHallId" name="hallId" />
+                    <input type="hidden" id="selectedDateISO" name="date" />
+
+                    <div class="form-grid">
+                      <label class="field">
+                        <span class="label">Event Name</span>
+                        <input
+                          id="inlineEventName"
+                          type="text"
+                          class="input"
+                          placeholder="e.g., Gala Night"
+                          required
+                        />
+                      </label>
+
+                      <label class="field">
+                        <span class="label">Full Name</span>
+                        <input
+                          id="inlineFullName"
+                          type="text"
+                          class="input"
+                          placeholder="Your full name"
+                          required
+                        />
+                      </label>
+
+                      <label class="field">
+                        <span class="label">Email</span>
+                        <input
+                          id="inlineEmail"
+                          type="email"
+                          class="input"
+                          placeholder="name@company.com"
+                          required
+                        />
+                      </label>
+
+                      <label class="field">
+                        <span class="label">Phone Number</span>
+                        <input
+                          id="inlinePhone"
+                          type="tel"
+                          class="input"
+                          placeholder="+1 (555) 000-0000"
+                          required
+                        />
+                      </label>
+
+                      <label class="field form-span-2">
+                        <span class="label">Optional Notes</span>
+                        <textarea
+                          id="inlineNotes"
+                          class="input"
+                          rows="2"
+                          placeholder="Any special setup requests (optional)"
+                        ></textarea>
+                      </label>
+                    </div>
+
+                    <div class="booking-actions">
+                      <button
+                        type="button"
+                        id="cancelAvailability"
+                        class="btn-ghost"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        id="inlineSubmitBtn"
+                        class="btn-gold"
+                      >
+                        <span id="inlineSubmitText">Continue</span>
+                        <span
+                          id="inlineSubmitSpinner"
+                          class="spinner hidden"
+                          aria-hidden="true"
+                        ></span>
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          <!-- ── Account Choice Modal ── -->
+          <div
+            id="accountModal"
+            class="modal-overlay hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="accountModalTitle"
+          >
+            <div class="modal">
+              <div class="modal-header">
+                <div class="modal-title" id="accountModalTitle">
+                  Would you like to create an account?
+                </div>
+                <button
+                  class="modal-close"
+                  id="closeAccountModal"
+                  aria-label="Close"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div class="modal-body" id="accountModalBody">
+                <div class="modal-note">
+                  Recommended for booking history, faster checkouts, and
+                  managing your reservations.
+                </div>
+
+                <div class="modal-actions">
+                  <button
+                    type="button"
+                    class="btn btn-gold"
+                    id="modalCreateAccount"
+                  >
+                    ✦ Create Account (Recommended)
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    id="modalContinueGuest"
+                  >
+                    Continue as Guest
+                  </button>
+                </div>
+
+                <div class="modal-foot" id="modalBookingSummary"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Scripts -->
+    <script>
+      // Current year in footer if needed
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+    <script src="/js/hall-calendar.js"></script>
+  </body>
+</html>

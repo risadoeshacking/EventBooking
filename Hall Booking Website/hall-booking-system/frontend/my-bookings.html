@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EventSpace — My Bookings</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-[var(--bg)] text-[var(--text)] font-[Inter]">
+    <header
+      class="sticky top-0 z-50 border-b border-white/10 bg-[rgba(10,16,29,0.55)] backdrop-blur-xl"
+    >
+      <nav
+        class="mx-auto max-w-6xl px-4 sm:px-6 py-3 flex items-center justify-between"
+      >
+        <a href="/" class="flex items-center gap-2">
+          <span
+            class="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-fuchsia-500 to-cyan-400 text-black font-bold"
+            >E</span
+          >
+          <span class="text-lg font-semibold tracking-tight">EventSpace</span>
+        </a>
+        <div class="flex items-center gap-3">
+          <a class="btn btn-secondary" href="/halls.html">Halls</a>
+          <button id="logoutBtn" class="btn btn-ghost" type="button">
+            Logout
+          </button>
+        </div>
+      </nav>
+    </header>
+
+    <main class="mx-auto max-w-6xl px-4 sm:px-6 py-10 sm:py-14">
+      <div
+        class="flex flex-col md:flex-row md:items-end md:justify-between gap-4"
+      >
+        <div>
+          <h1 class="text-3xl font-bold">My Bookings</h1>
+          <p class="text-[var(--muted)] mt-2">
+            View booking history and track approval status.
+          </p>
+        </div>
+        <div class="glass rounded-3xl p-4 w-full md:w-auto">
+          <div class="flex flex-col sm:flex-row gap-3">
+            <select id="statusFilter" class="input">
+              <option value="">All statuses</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            <button id="refreshBtn" class="btn btn-secondary">Refresh</button>
+          </div>
+        </div>
+      </div>
+
+      <section class="mt-8 glass rounded-3xl p-6 sm:p-8 overflow-hidden">
+        <div
+          class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+        >
+          <h2 class="text-lg font-semibold">Bookings</h2>
+          <div class="text-sm text-[var(--muted)]">
+            Tip: pending bookings can be cancelled.
+          </div>
+        </div>
+
+        <div class="mt-5 overflow-x-auto">
+          <table class="w-full min-w-[720px] text-sm">
+            <thead>
+              <tr class="text-left text-[var(--muted)]">
+                <th class="py-3">Event</th>
+                <th class="py-3">Hall</th>
+                <th class="py-3">Date</th>
+                <th class="py-3">Time</th>
+                <th class="py-3">Guests</th>
+                <th class="py-3">Status</th>
+                <th class="py-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="bookingTbody" class="divide-y divide-white/10"></tbody>
+          </table>
+        </div>
+
+        <div id="emptyState" class="hidden text-[var(--muted)] text-sm mt-6">
+          No bookings found.
+        </div>
+      </section>
+    </main>
+
+    <footer
+      class="border-t border-white/10 bg-[rgba(10,16,29,0.5)] backdrop-blur-xl"
+    >
+      <div
+        class="mx-auto max-w-6xl px-4 sm:px-6 py-10 text-sm text-[var(--muted)]"
+      >
+        © <span id="year"></span> EventSpace
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+    <script src="/js/my-bookings.js"></script>
+  </body>
+</html>
