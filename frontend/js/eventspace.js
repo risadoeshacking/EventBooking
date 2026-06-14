@@ -143,11 +143,35 @@
   });
 
   // ─── STATE ───
-  var currentMonth = new Date().getMonth();
-  var currentYear = new Date().getFullYear();
-  var todayStr = dateToStr(new Date());
+  var now = new Date();
+  var currentMonth = now.getMonth();
+  var currentYear = now.getFullYear();
+  var todayStr = dateToStr(now);
   var hallData = HALL_DATA[hallKey] || HALL_DATA["hall-1"];
   var selectedSlot = null; // { date, hour }
+
+  // ─── PAST DATE/TIME HELPERS ───
+  function isPastDate(dateStr) {
+    return dateStr < todayStr;
+  }
+
+  function getCurrentHour() {
+    return new Date().getHours();
+  }
+
+  function getCurrentMinutes() {
+    return new Date().getMinutes();
+  }
+
+  // Returns the minimum bookable hour for today (if minutes > 0, round up)
+  function getMinBookableHourForToday() {
+    var h = getCurrentHour();
+    var m = getCurrentMinutes();
+    // If we're past the hour (e.g. 8:30), the 8-9 slot should be locked
+    // So the minimum bookable hour is current hour + 1 (or current hour if exactly on the hour)
+    if (m > 0) return h + 1;
+    return h;
+  }
 
   // ─── HELPERS ───
   function dateToStr(d) {
@@ -253,6 +277,9 @@
 
   // ─── RENDER CALENDAR ───
   async function renderCalendar() {
+    // Refresh "now" on each render
+    now = new Date();
+    todayStr = dateToStr(now);
     var grid = els.esCalendarGrid;
     if (!grid) return;
 
@@ -318,6 +345,8 @@
 
       var cell = document.createElement("div");
       cell.className = "es-day-cell";
+      var isPast = isPastDate(dateStr);
+      if (isPast) cell.classList.add("es-past");
       if (isToday) cell.classList.add("es-today");
       cell.dataset.date = dateStr;
 
@@ -328,7 +357,10 @@
 
       var indicator = document.createElement("span");
       indicator.className = "es-day-indicator";
-      if (bookedCount === 0) {
+      if (isPast) {
+        indicator.textContent = "Locked";
+        indicator.style.color = "rgba(120,120,120,0.4)";
+      } else if (bookedCount === 0) {
         indicator.classList.add("avail");
         indicator.textContent = "Available";
       } else if (bookedCount < totalSlots) {
@@ -340,14 +372,16 @@
       }
       cell.appendChild(indicator);
 
-      cell.addEventListener(
-        "click",
-        (function (ds) {
-          return function () {
-            openDayView(ds);
-          };
-        })(dateStr)
-      );
+      if (!isPast) {
+        cell.addEventListener(
+          "click",
+          (function (ds) {
+            return function () {
+              openDayView(ds);
+            };
+          })(dateStr)
+        );
+      }
 
       grid.appendChild(cell);
     }
@@ -393,11 +427,17 @@
       bookedSet[h] = true;
     });
 
+    // Check if this is today — if so, past time slots should be locked
+    var isToday = dateStr === todayStr;
+    var minBookableHour = isToday ? getMinBookableHourForToday() : SLOT_START;
+
     for (var h = SLOT_START; h < SLOT_END; h++) {
       var isBooked = !!bookedSet[h];
+      var isPast = isToday && h < minBookableHour;
       var slot = document.createElement("div");
       slot.className = "es-slot";
       if (isBooked) slot.classList.add("is-booked");
+      if (isPast) slot.classList.add("is-past");
 
       var lockSpan = document.createElement("span");
       lockSpan.className = "es-slot-lock";
@@ -411,10 +451,14 @@
 
       var labelSpan = document.createElement("span");
       labelSpan.className = "es-slot-label";
-      labelSpan.textContent = isBooked ? "Booked" : "Available";
+      if (isPast) {
+        labelSpan.textContent = "Locked";
+      } else {
+        labelSpan.textContent = isBooked ? "Booked" : "Available";
+      }
       slot.appendChild(labelSpan);
 
-      if (!isBooked) {
+      if (!isBooked && !isPast) {
         slot.addEventListener(
           "click",
           (function (hour) {
@@ -491,8 +535,18 @@
 
   // ─── EVENT LISTENERS ───
 
-  // Month navigation
+  // Month navigation — prevent going to past months
   els.esPrevMonth.addEventListener("click", function () {
+    var nowCheck = new Date();
+    var curYear = nowCheck.getFullYear();
+    var curMonth = nowCheck.getMonth();
+    // Don't allow navigating before the current month
+    if (
+      currentYear < curYear ||
+      (currentYear === curYear && currentMonth <= curMonth)
+    ) {
+      return;
+    }
     currentMonth--;
     if (currentMonth < 0) {
       currentMonth = 11;

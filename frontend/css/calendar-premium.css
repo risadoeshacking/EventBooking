@@ -224,6 +224,79 @@
   font-weight: 700;
 }
 
+/* ============================================================
+   PAST DATES — Locked / blacked out state
+   ============================================================ */
+.calendar-premium .is-past-day .fc-daygrid-day-frame {
+  background: rgba(120, 120, 120, 0.12) !important;
+  border-color: rgba(120, 120, 120, 0.15) !important;
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.calendar-premium .is-past-day .fc-daygrid-day-number {
+  color: rgba(120, 120, 120, 0.5) !important;
+  text-decoration: line-through;
+}
+
+.calendar-premium .is-past-day .fc-daygrid-day-frame::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 18px;
+  height: 18px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(120,120,120,0.45)' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2' ry='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E")
+    center/contain no-repeat;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.calendar-premium .is-past-day::after {
+  content: "Locked";
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(120, 120, 120, 0.2);
+  color: rgba(120, 120, 120, 0.6);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.calendar-premium .is-past-day:hover .fc-daygrid-day-frame {
+  transform: none !important;
+  box-shadow: none !important;
+  background: rgba(120, 120, 120, 0.12) !important;
+  border-color: rgba(120, 120, 120, 0.15) !important;
+}
+
+/* Today's past hours indicator */
+.calendar-premium .is-today-partial .fc-daygrid-day-frame {
+  position: relative;
+}
+
+.calendar-premium .is-today-partial .today-partial-badge {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  background: rgba(245, 197, 66, 0.15);
+  color: rgba(107, 15, 26, 0.7);
+  font-size: 7px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 999px;
+  pointer-events: none;
+  z-index: 3;
+}
+
 .calendar-premium .is-booked-day::after {
   content: "";
   position: absolute;

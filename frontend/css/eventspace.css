@@ -246,6 +246,30 @@ body {
   pointer-events: none;
 }
 
+/* ─── PAST DATE CELLS ─── */
+.es-day-cell.es-past {
+  background: rgba(120, 120, 120, 0.08);
+  border-color: rgba(120, 120, 120, 0.12);
+  cursor: not-allowed;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.es-day-cell.es-past .es-day-number {
+  color: rgba(120, 120, 120, 0.5);
+  text-decoration: line-through;
+}
+
+.es-day-cell.es-past .es-day-indicator {
+  color: rgba(120, 120, 120, 0.4);
+}
+
+.es-day-cell.es-past:hover {
+  border-color: rgba(120, 120, 120, 0.12);
+  box-shadow: none;
+  transform: none;
+}
+
 .es-day-cell.es-today {
   border-color: var(--es-gold);
   background: linear-gradient(135deg, #fffcf0, #fff8e0);
@@ -504,6 +528,38 @@ body {
 
 .es-slot:hover::after {
   border-color: var(--es-gold);
+}
+
+/* ─── PAST / LOCKED TIME SLOT ─── */
+.es-slot.is-past {
+  background: rgba(120, 120, 120, 0.08);
+  border-color: rgba(120, 120, 120, 0.15);
+  cursor: not-allowed;
+  pointer-events: none;
+  box-shadow: none;
+}
+
+.es-slot.is-past .es-slot-time {
+  color: rgba(120, 120, 120, 0.45);
+  text-decoration: line-through;
+}
+
+.es-slot.is-past .es-slot-label {
+  color: rgba(120, 120, 120, 0.35);
+}
+
+.es-slot.is-past .es-slot-lock {
+  display: inline-block;
+  font-size: 11px;
+  margin-right: 4px;
+  font-weight: 700;
+  color: rgba(120, 120, 120, 0.4);
+}
+
+.es-slot.is-past:hover {
+  border-color: rgba(120, 120, 120, 0.15);
+  box-shadow: none;
+  transform: none;
 }
 
 /* ─── BOOKED SLOT ─── */

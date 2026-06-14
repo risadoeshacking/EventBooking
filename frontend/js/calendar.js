@@ -15,6 +15,14 @@
     return dateObj.toISOString().slice(0, 10);
   }
 
+  function getTodayISO() {
+    return getDateISO(new Date());
+  }
+
+  function isPastDate(dateISO) {
+    return dateISO < getTodayISO();
+  }
+
   async function fetchHallIdBySlug(hallSlug) {
     const r = await fetch(`/api/halls/${encodeURIComponent(hallSlug)}`);
     if (!r.ok) throw new Error("Failed to load hall");
@@ -85,12 +93,19 @@
           center: "title",
           right: "today dayGridMonth",
         },
+        validRange: {
+          start: getTodayISO(),
+        },
         datesSet: function () {
           // keep hint calm
         },
         events: [],
         dateClick: function (info) {
           const dateISO = getDateISO(info.date);
+          if (isPastDate(dateISO)) {
+            setHint("This date has passed — please choose today or later.");
+            return;
+          }
           if (bookedSet.has(dateISO)) {
             setHint("Booked — please choose another date.");
             return;
@@ -105,8 +120,19 @@
           const dateISO = getDateISO(arg.date);
           const dayEl = arg.el;
           if (!dayEl) return;
-          if (bookedSet.has(dateISO)) dayEl.classList.add("is-booked-day");
-          else dayEl.classList.add("is-available-day");
+          if (isPastDate(dateISO)) {
+            dayEl.classList.add("is-past-day");
+            dayEl.classList.remove("is-available-day");
+            dayEl.classList.remove("is-booked-day");
+          } else if (bookedSet.has(dateISO)) {
+            dayEl.classList.add("is-booked-day");
+            dayEl.classList.remove("is-available-day");
+            dayEl.classList.remove("is-past-day");
+          } else {
+            dayEl.classList.add("is-available-day");
+            dayEl.classList.remove("is-booked-day");
+            dayEl.classList.remove("is-past-day");
+          }
         },
       });
 

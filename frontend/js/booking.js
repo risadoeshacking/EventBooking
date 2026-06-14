@@ -78,6 +78,101 @@
     });
   }
 
+  // ── Date & Time Restriction Helpers ──
+  function getTodayISO() {
+    const now = new Date();
+    return now.toISOString().slice(0, 10);
+  }
+
+  function getCurrentHourMinutes() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, "0");
+    const m = String(now.getMinutes()).padStart(2, "0");
+    return { hour: now.getHours(), minutes: m, timeStr: `${h}:${m}` };
+  }
+
+  function restrictDateInput() {
+    if (!dateInput) return;
+    // Only allow today onwards
+    dateInput.setAttribute("min", getTodayISO());
+  }
+
+  function restrictTimeSlotsForToday() {
+    if (!dateInput || !startTime) return;
+    const selectedDate = dateInput.value;
+    const todayISO = getTodayISO();
+
+    if (selectedDate === todayISO) {
+      // Selected date is today — lock out past time slots
+      const { hour, minutes } = getCurrentHourMinutes();
+      // If minutes > 0, round up to next hour so the current hour slot is locked
+      const nextHour = minutes > 0 ? hour + 1 : hour;
+      const minTime = String(nextHour).padStart(2, "0") + ":00";
+
+      if (nextHour >= 24) {
+        // Past the last possible hour today — no times available
+        startTime.value = "";
+        startTime.disabled = true;
+        endTime.value = "";
+        endTime.disabled = true;
+        setMsg(
+          "No more time slots available today. Please select another date.",
+          "error"
+        );
+        return;
+      }
+
+      startTime.disabled = false;
+      endTime.disabled = false;
+      startTime.setAttribute("min", minTime);
+
+      // If current startTime value is before minTime, reset it
+      if (startTime.value && startTime.value < minTime) {
+        startTime.value = minTime;
+      }
+
+      // Update endTime min based on startTime
+      restrictEndTimeForStartTime();
+    } else {
+      // Future date — allow all times
+      startTime.disabled = false;
+      endTime.disabled = false;
+      startTime.removeAttribute("min");
+      endTime.removeAttribute("min");
+    }
+  }
+
+  function restrictEndTimeForStartTime() {
+    if (!startTime || !endTime) return;
+    const selectedDate = dateInput?.value;
+    const todayISO = getTodayISO();
+    const sTime = startTime.value;
+
+    if (!sTime) return;
+
+    if (selectedDate === todayISO) {
+      // On today, endTime must be after current time as well
+      const { timeStr } = getCurrentHourMinutes();
+      // End time must be at least 1 hour after start
+      const [sh, sm] = sTime.split(":").map(Number);
+      let endMinHour = sh + 1;
+      if (endMinHour >= 24) {
+        endMinHour = 24;
+      }
+      const minEnd = String(endMinHour).padStart(2, "0") + ":00";
+      endTime.setAttribute("min", minEnd);
+
+      if (endTime.value && endTime.value <= sTime) {
+        endTime.value = minEnd;
+      }
+    } else {
+      // Future date — just ensure end > start
+      const [sh] = sTime.split(":").map(Number);
+      const minEnd = String(sh + 1).padStart(2, "0") + ":00";
+      endTime.setAttribute("min", minEnd);
+    }
+  }
+
   function computeStep() {
     // Step rules:
     // 1: date
@@ -376,6 +471,13 @@
   ].forEach((el) => {
     el?.addEventListener("change", async () => {
       updateStepper();
+      // Restrict time slots when date or start time changes
+      if (el === dateInput) {
+        restrictTimeSlotsForToday();
+      }
+      if (el === startTime) {
+        restrictEndTimeForStartTime();
+      }
       // Only run availability when core time inputs are filled.
       if (el === dateInput || el === startTime || el === endTime) {
         checkAvailability().catch(() => {});
@@ -409,6 +511,10 @@
       window.location.href = "/login.html";
     });
   }
+
+  // Initialize date/time restrictions
+  restrictDateInput();
+  restrictTimeSlotsForToday();
 
   applyPrefill();
 
@@ -462,9 +568,20 @@
         center: "title",
         right: "dayGridMonth",
       },
+      validRange: {
+        start: getTodayISO(),
+      },
       events,
       dateClick: function (info) {
         const dateISO = info.date.toISOString().slice(0, 10);
+        // Block past dates
+        if (dateISO < getTodayISO()) {
+          setMsg(
+            "This date has passed — please choose today or later.",
+            "error"
+          );
+          return;
+        }
         if (bookedDates.includes(dateISO)) {
           setMsg(
             "That date is already booked. Please select an available date.",
@@ -474,6 +591,7 @@
         }
         dateInput.value = dateISO;
         setMsg("Date selected. Next: choose start and end times.", "info");
+        restrictTimeSlotsForToday();
         updateStepper();
         // UX: move user to Time step fields
         startTime?.focus?.();

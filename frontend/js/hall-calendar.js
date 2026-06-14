@@ -137,6 +137,14 @@
     return dateObj.toISOString().slice(0, 10);
   }
 
+  function getTodayISO() {
+    return getDateISO(new Date());
+  }
+
+  function isPastDate(dateISO) {
+    return dateISO < getTodayISO();
+  }
+
   function fmtDate(dateISO) {
     try {
       return new Date(dateISO + "T00:00:00").toLocaleDateString([], {
@@ -651,8 +659,15 @@
         locale: "en",
         events: events,
 
+        validRange: {
+          start: getTodayISO(),
+        },
         dateClick: function (info) {
           var dateISO = getDateISO(info.date);
+          if (isPastDate(dateISO)) {
+            setHint("This date has passed — please choose today or later.");
+            return;
+          }
           var isBooked = bookedSet.has(dateISO);
           cinematicZoom(info.date, isBooked);
         },
@@ -662,9 +677,26 @@
           var dayEl = arg.el;
           if (!dayEl) return;
 
-          if (bookedSet.has(dateISO)) {
+          // Remove existing labels
+          var existingLabel = dayEl.querySelector(".booked-label");
+          if (existingLabel) existingLabel.remove();
+
+          if (isPastDate(dateISO)) {
+            dayEl.classList.add("is-past-day");
+            dayEl.classList.remove("is-available-day");
+            dayEl.classList.remove("is-booked-day");
+
+            var existingLock = dayEl.querySelector(".past-label");
+            if (!existingLock) {
+              var lockLabel = document.createElement("span");
+              lockLabel.className = "past-label";
+              lockLabel.textContent = "Locked";
+              dayEl.appendChild(lockLabel);
+            }
+          } else if (bookedSet.has(dateISO)) {
             dayEl.classList.add("is-booked-day");
             dayEl.classList.remove("is-available-day");
+            dayEl.classList.remove("is-past-day");
 
             var existing = dayEl.querySelector(".booked-label");
             if (!existing) {
@@ -676,9 +708,7 @@
           } else {
             dayEl.classList.add("is-available-day");
             dayEl.classList.remove("is-booked-day");
-
-            var label = dayEl.querySelector(".booked-label");
-            if (label) label.remove();
+            dayEl.classList.remove("is-past-day");
           }
         },
       });
@@ -781,9 +811,20 @@
             "-" +
             String(date).padStart(2, "0");
           var isToday = dateStr === todayStr;
+          var isPast = isPastDate(dateStr);
           var isBooked = booked.has(dateStr);
 
-          if (isBooked) {
+          if (isPast) {
+            cell.style.background = "rgba(120,120,120,0.12)";
+            cell.style.color = "rgba(120,120,120,0.5)";
+            cell.style.cursor = "not-allowed";
+            cell.style.borderColor = "rgba(120,120,120,0.15)";
+            cell.style.opacity = "0.45";
+            cell.innerHTML =
+              '<div style="font-weight:700;font-size:14px;padding:4px;text-decoration:line-through;">' +
+              date +
+              '</div><div style="font-size:8px;font-weight:800;color:rgba(120,120,120,0.6);text-align:center;">Locked</div>';
+          } else if (isBooked) {
             cell.style.background = "rgba(107,15,26,0.92)";
             cell.style.color = "white";
             cell.style.cursor = "not-allowed";
@@ -792,7 +833,7 @@
               '<div style="font-weight:700;font-size:14px;padding:4px;">' +
               date +
               '</div><div style="font-size:8px;font-weight:800;color:#f5c542;text-align:center;">Booked</div>';
-          } else {
+          } else if (!isPast) {
             if (isToday) {
               cell.style.border = "2px solid #f5c542";
               cell.style.boxShadow = "0 0 0 3px rgba(245,197,66,0.2)";
@@ -844,6 +885,13 @@
       prevBtn.style.cssText =
         "padding:8px 16px;border-radius:999px;border:1px solid rgba(107,15,26,0.12);background:white;font-weight:600;font-size:13px;cursor:pointer;";
       prevBtn.addEventListener("click", function () {
+        var now = new Date();
+        var curYear = now.getFullYear();
+        var curMonth = now.getMonth();
+        // Don't allow navigating before the current month
+        if (year < curYear || (year === curYear && month <= curMonth)) {
+          return;
+        }
         month--;
         if (month < 0) {
           month = 11;
